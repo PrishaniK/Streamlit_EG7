@@ -1,1 +1,1 @@
-# Streamlit_EG7
+# EG7_2401FTDS_Unsupervised_Learning_Project_Streamlit
