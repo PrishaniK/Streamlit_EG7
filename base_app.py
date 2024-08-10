@@ -8,6 +8,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
+import joblib
+import gzip
 
 
 @st.cache_resource
@@ -22,11 +24,15 @@ def load_anime_data():
 def load_ratings_data():
     return pd.read_csv('train.csv')
 
+# @st.cache_resource
+# def load_svd_model():
+#     with open('svd_model.pkl', 'rb') as f:
+#         return pickle.load(f)
 @st.cache_resource
 def load_svd_model():
-    with open('svd_model.pkl', 'rb') as f:
-        return pickle.load(f)
-
+    with gzip.open('svd_model.joblib.gz', 'rb') as f:
+        return joblib.load(f)
+    
 @st.cache_resource
 def compute_tfidf_matrix(anime_data):
     tfidf_vectorizer = TfidfVectorizer(stop_words='english')
