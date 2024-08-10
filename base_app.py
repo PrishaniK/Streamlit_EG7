@@ -10,6 +10,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 import joblib
 import gzip
+import os
 
 
 @st.cache_resource
@@ -28,10 +29,38 @@ def load_ratings_data():
 # def load_svd_model():
 #     with open('svd_model.pkl', 'rb') as f:
 #         return pickle.load(f)
-@st.cache_resource
-def load_svd_model():
-    with gzip.open('svd_model.joblib.gz', 'rb') as f:
-        return joblib.load(f)
+# @st.cache_resource
+# def load_svd_model():
+#     with gzip.open('svd_model.joblib.gz', 'rb') as f:
+#         return joblib.load(f)
+def load_svd_model_from_folder(folder_path):
+    if not os.path.isdir(folder_path):
+        st.error(f"Folder not found: {folder_path}")
+        return None
+    
+    # List and sort all .pkl files in the folder
+    chunk_files = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.pkl')]
+    
+    if not chunk_files:
+        st.error(f"No .pkl files found in the folder: {folder_path}")
+        return None
+    
+    chunk_files.sort()  # Ensure chunks are in the correct order
+    
+    model_bytes = b''
+    for chunk_file in chunk_files:
+        try:
+            with open(chunk_file, 'rb') as f:
+                model_bytes += f.read()
+        except Exception as e:
+            st.error(f"Error reading file {chunk_file}: {e}")
+            return None
+    
+    try:
+        return pickle.loads(model_bytes)
+    except Exception as e:
+        st.error(f"Error loading pickle data: {e}")
+        return None
     
 @st.cache_resource
 def compute_tfidf_matrix(anime_data):
@@ -55,7 +84,12 @@ else:
     st.stop()
 
 # Load models
-svd_model = load_svd_model()
+# svd_model = load_svd_model()
+svd_model = load_svd_model_from_folder('SVD model')
+# Lazy model loading
+# @st.cache_resource
+# def get_svd_model():
+#     return load_svd_model()
 
 # Compute TF-IDF matrix and cosine similarity
 tfidf_matrix = compute_tfidf_matrix(anime_data)
