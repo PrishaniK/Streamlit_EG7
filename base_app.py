@@ -33,7 +33,7 @@ def load_ratings_data():
 # def load_svd_model():
 #     with gzip.open('svd_model.joblib.gz', 'rb') as f:
 #         return joblib.load(f)
-@st.cache_resource
+# @st.cache_resource
 def load_svd_model():
     with lzma.open('svd_model.joblib.xz', 'rb') as f:
         return joblib.load(f)
