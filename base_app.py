@@ -12,6 +12,7 @@ import joblib
 import gzip
 import os
 import lzma
+import scipy.sparse
 
 @st.cache_resource
 def load_image(image_path):
@@ -38,10 +39,17 @@ def load_svd_model():
     with lzma.open('svd_model.joblib.xz', 'rb') as f:
         return joblib.load(f)
 
+# @st.cache_resource
+# def compute_tfidf_matrix(anime_data):
+#     tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+#     return tfidf_vectorizer.fit_transform(anime_data['genre'])
 @st.cache_resource
-def compute_tfidf_matrix(anime_data):
-    tfidf_vectorizer = TfidfVectorizer(stop_words='english')
-    return tfidf_vectorizer.fit_transform(anime_data['genre'])
+def load_tfidf_vectorizer():
+    return joblib.load('tfidf_vectorizer.joblib')
+
+@st.cache_resource
+def load_tfidf_matrix():
+    return scipy.sparse.load_npz('tfidf_matrix.npz')
 
 @st.cache_resource
 def compute_cosine_similarity(_tfidf_matrix):
@@ -62,10 +70,15 @@ else:
 # Load the SVD model
 svd_model = load_svd_model()
 
-# Compute TF-IDF matrix and cosine similarity
-tfidf_matrix = compute_tfidf_matrix(anime_data)
-cosine_sim = compute_cosine_similarity(tfidf_matrix)
+# # Compute TF-IDF matrix and cosine similarity
+# tfidf_matrix = compute_tfidf_matrix(anime_data)
+# cosine_sim = compute_cosine_similarity(tfidf_matrix)
+# Load the TF-IDF vectorizer and matrix
+tfidf_vectorizer = load_tfidf_vectorizer()
+tfidf_matrix = load_tfidf_matrix()
 
+# Compute cosine similarity if needed
+cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 # Sidebar navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Recommend Anime", "Overview", "Insights", "Anime Archive", "About Us"], key="navigation")
